@@ -38,5 +38,6 @@ android {
 
 dependencies {
     api fileTree(dir: 'libs', include: ['*.jar'])
-    api 'org.tensorflow:tensorflow-lite:1.13.1'
+//    api 'org.tensorflow:tensorflow-lite:1.13.1'
+    api 'org.tensorflow:tensorflow-lite:2.4.0'
 }

@@ -6,14 +6,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Point;
+import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -25,7 +26,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
-import me.pqpo.smartcropperlib.SmartCropper;
 import me.pqpo.smartcropperlib.view.CropImageView;
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -177,8 +177,21 @@ public class CropActivity extends AppCompatActivity implements EasyPermissions.P
                 options.inJustDecodeBounds = false;
                 options.inSampleSize = calculateSampleSize(options);
                 selectedBitmap = BitmapFactory.decodeStream(cr.openInputStream(bmpUri), new Rect(), options);
+
+                ExifInterface exif = new ExifInterface(bmpUri.getPath().replace("/raw/",""));
+                int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+                int rotationInDegrees = exifToDegrees(rotation);
+                Matrix matrix = new Matrix();
+                if (rotation != 0f) {
+                    matrix.preRotate(rotationInDegrees);
+                    selectedBitmap = Bitmap.createBitmap(selectedBitmap,0,0, selectedBitmap.getWidth(), selectedBitmap.getHeight(), matrix, true);
+                }
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
+            } catch(IOException ex){
+//                Log.e(TAG, "Failed to get Exif data", ex);
+            } catch( Exception e ) {
+
             }
         }
         if (selectedBitmap != null) {
@@ -186,6 +199,12 @@ public class CropActivity extends AppCompatActivity implements EasyPermissions.P
         }
     }
 
+    private int exifToDegrees(int exifOrientation) {
+        if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) { return 90; }
+        else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {  return 180; }
+        else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {  return 270; }
+        return 0;
+    }
 
     private void saveImage(Bitmap bitmap, File saveFile) {
         try {
