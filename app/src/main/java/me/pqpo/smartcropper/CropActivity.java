@@ -188,7 +188,7 @@ public class CropActivity extends AppCompatActivity implements EasyPermissions.P
                 }
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
-            } catch(IOException ex){
+            } catch(IOException ex) {
 //                Log.e(TAG, "Failed to get Exif data", ex);
             } catch( Exception e ) {
 
