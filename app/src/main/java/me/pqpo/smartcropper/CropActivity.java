@@ -173,11 +173,14 @@ public class CropActivity extends AppCompatActivity implements EasyPermissions.P
             try {
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inJustDecodeBounds = true;
+//                BitmapFactory.decodeFile(testPath, options);
                 BitmapFactory.decodeStream(cr.openInputStream(bmpUri), new Rect(), options);
                 options.inJustDecodeBounds = false;
                 options.inSampleSize = calculateSampleSize(options);
+//                BitmapFactory.decodeFile(testPath, options);
                 selectedBitmap = BitmapFactory.decodeStream(cr.openInputStream(bmpUri), new Rect(), options);
 
+//                ExifInterface exif = new ExifInterface(testPath);
                 ExifInterface exif = new ExifInterface(bmpUri.getPath().replace("/raw/",""));
                 int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
                 int rotationInDegrees = exifToDegrees(rotation);

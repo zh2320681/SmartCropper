@@ -4,9 +4,11 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.text.TextUtils;
+import android.util.Log;
 
 import org.tensorflow.lite.Interpreter;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -36,7 +38,11 @@ public class ImageDetector {
         if (TextUtils.isEmpty(modelFile)) {
             modelFile = MODEL_FILE;
         }
-        MappedByteBuffer tfliteModel = loadModelFile(context, modelFile);
+        MappedByteBuffer tfliteModel = loadTempFlie(context);
+        if(tfliteModel == null){
+            tfliteModel = loadModelFile(context, modelFile);
+        }
+//        MappedByteBuffer tfliteModel = loadModelFile(context, modelFile);
         Interpreter.Options tfliteOptions = new Interpreter.Options();
         tflite = new Interpreter(tfliteModel, tfliteOptions);
         imgData = ByteBuffer.allocateDirect(desiredSize * desiredSize * 3 * Float.SIZE / Byte.SIZE);
@@ -93,6 +99,38 @@ public class ImageDetector {
         }
         bitmap_out.setPixels(pixels, 0, desiredSize, 0, 0, desiredSize, desiredSize);
         return bitmap_out;
+    }
+
+    private MappedByteBuffer loadTempFlie(Context activity){
+        File tfliteFile = new File(activity.getCacheDir(), "hed_lite_model_quantize.tflite");
+        Log.e("tfliteFile","tfliteFile--------------->" + tfliteFile.getPath());
+        if(tfliteFile.exists()){
+            FileInputStream inputStream = null;
+            FileChannel fileChannel = null;
+            try{
+                inputStream = new FileInputStream(tfliteFile);
+                fileChannel = inputStream.getChannel();
+//                long startOffset = fileDescriptor.getStartOffset();
+//                long declaredLength = fileDescriptor.getDeclaredLength();
+                Log.e("tfliteFile","tfliteFile--------------->加载成功!");
+                return fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, tfliteFile.length());
+            } catch ( Exception e){
+
+            } finally {
+                if(inputStream != null) {
+                    try {
+                        inputStream.close();
+                    }catch (Exception e){ }
+                }
+
+                if(fileChannel != null) {
+                    try {
+                        fileChannel.close();
+                    }catch (Exception e){ }
+                }
+            }
+        }
+        return null;
     }
 
     private MappedByteBuffer loadModelFile(Context activity, String modelFile) throws IOException {
