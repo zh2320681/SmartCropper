@@ -76,11 +76,41 @@ public class SmartCropper {
         return cropBitmap;
     }
 
+    public static Bitmap filteImage(Bitmap srcBitmap,FilterType type){
+        if(srcBitmap == null){
+            return srcBitmap;
+        }
+        Bitmap cropBitmap = Bitmap.createBitmap(srcBitmap.getWidth(), srcBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        if(type == FilterType.enhance) {
+            enhance(srcBitmap,cropBitmap);
+        } else if(type == FilterType.blackWhite) {
+            blackWhite(srcBitmap,cropBitmap);
+        } else if(type == FilterType.brighten) {
+            brighten(srcBitmap,cropBitmap);
+        } else if(type == FilterType.grey) {
+            grey(srcBitmap,cropBitmap);
+        }
+        return cropBitmap;
+    }
 
 
     private static native void nativeScan(Bitmap srcBitmap, Point[] outPoints, boolean canny);
 
     private static native void nativeCrop(Bitmap srcBitmap, Point[] points, Bitmap outBitmap);
+
+    //增强
+    private static native void enhance(Bitmap srcBitmap,Bitmap outBitmap);
+
+    //黑白
+    private static native void blackWhite(Bitmap srcBitmap,Bitmap outBitmap);
+
+    //增亮
+    private static native void brighten(Bitmap srcBitmap,Bitmap outBitmap);
+
+    //增亮
+    private static native void grey(Bitmap srcBitmap,Bitmap outBitmap);
+
+//    public static native int brighten(String inputPath, String outputPath);
 
     static {
         System.loadLibrary("smart_cropper");

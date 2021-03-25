@@ -36,8 +36,7 @@ android {
     }
 
     aaptOptions {
-        noCompress "tflite"
-        noCompress "lite"
+        noCompress ".tflite","hed_lite_model_quantize.tflite","tflite","lite"
     }
 }
 

@@ -4,11 +4,14 @@
 # Sets the minimum version of CMake required to build the native library.
 
 cmake_minimum_required(VERSION 3.4.1)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 set(TARGET smart_cropper)
 set(SRC_DIR src/main/cpp/)
 set(OPENCV_LIB_DIR opencv/lib/${ANDROID_ABI}/)
 set(OPENCV_3RD_LIB_DIR opencv/3rdparty/${ANDROID_ABI}/)
+set(OpenCV_LIBS opencv/include/opencv2/)
 
 include_directories(opencv/include
                     src/main/cpp/include)
@@ -33,7 +36,17 @@ add_library(${TARGET} SHARED ${DIR_LIB_SOURCE})
 # you want to add. CMake verifies that the library exists before
 # completing its build.
 
+find_library(
+        log-lib
+        log
+)
+
 target_link_libraries(${TARGET} log jnigraphics z)
+
+#target_link_libraries(
+#        filter
+#        ${OpenCV_LIBS}
+#        ${log-lib})
 
 # Specifies libraries CMake should link to your target library. You
 # can link multiple libraries, such as libraries you define in this

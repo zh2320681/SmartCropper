@@ -5,6 +5,8 @@
 #include <string>
 #include <android_utils.h>
 #include <Scanner.h>
+#include <Filter.h>
+#include "android/log.h"
 
 using namespace std;
 
@@ -96,6 +98,106 @@ static void native_crop(JNIEnv *env, jclass type, jobject srcBitmap, jobjectArra
     mat_to_bitmap(env, dstBitmapMat, outBitmap);
 }
 
+//操作类型 optType : 1 黑白 2 上色 3 锐化 4. 增亮 5 灰度
+static void native_commonProcess(JNIEnv *env, jobject srcBitmap, jobject outBitmap, int optType){
+    Mat srcBitmapMat,outBitmapMat;
+    bitmap_to_mat(env, srcBitmap, srcBitmapMat);
+    cv::Mat img;
+    if (srcBitmapMat.channels() == 1) {
+        cv::cvtColor(srcBitmapMat, img, cv::COLOR_GRAY2BGR);
+    } else if (srcBitmapMat.channels() == 4) {
+        cv::cvtColor(srcBitmapMat, img, cv::COLOR_BGRA2BGR);
+    } else {
+        srcBitmapMat.copyTo(img);
+    }
+
+    Filter filter = Filter();
+    int height = img.rows;
+    int width = img.cols;
+    float fScale = filter.getScale(height, width, 2000);  //1024值可以设定，表示长边尺寸不得超过1024，按照长边归一化
+
+    int window_size = (int)(width*fScale * 20 / 256);
+    window_size = window_size % 2 ? window_size : window_size + 1;
+
+    cv::Mat gray, blackWhite,colorImg, enhanceImg, brightImg;
+    if (fScale == 1.0) {
+        cv::cvtColor(img, gray, cv::COLOR_BGR2GRAY);
+        filter.sauvolaWithSigmoid(gray, blackWhite, window_size, 0.1); //黑白功能
+        filter.coloring(img, blackWhite, colorImg);//上色功能
+        filter.colorEnhance(colorImg, enhanceImg);//上色锐化功能
+        filter.brighten(colorImg,brightImg);
+    } else {
+        //将图像缩小
+        cv::Mat imgReisize, blackWhiteResize, colorImgResize, enhanceImgResize, brightImgResize;
+        cv::resize(img, imgReisize, cv::Size(), fScale, fScale, cv::INTER_CUBIC);
+        //对缩小后的图像进行处理
+        cv::cvtColor(imgReisize, gray, cv::COLOR_BGR2GRAY);
+        filter.sauvolaWithSigmoid(gray, blackWhiteResize, window_size, 0.1);  //黑白功能
+        filter.coloring(imgReisize, blackWhiteResize, colorImgResize); //上色功能
+        filter.colorEnhance(colorImgResize, enhanceImgResize); //上色锐化功能
+        filter.brighten(imgReisize, brightImgResize); //增亮功能
+
+        //对处理后的图片放大到原有尺寸
+        cv::resize(blackWhiteResize, blackWhite, cv::Size(width, height), cv::INTER_CUBIC);
+        cv::resize(colorImgResize, colorImg, cv::Size(width, height), cv::INTER_CUBIC);
+        cv::resize(enhanceImgResize, enhanceImg, cv::Size(width, height), cv::INTER_CUBIC);
+        cv::resize(brightImgResize, brightImg, cv::Size(width, height), cv::INTER_CUBIC);
+    }
+
+    if(optType == 1) {
+        outBitmapMat = blackWhite.clone();
+    } else if (optType == 2){
+        outBitmapMat = colorImg.clone();
+    } else if (optType == 3) {
+        outBitmapMat = enhanceImg.clone();
+    } else if(optType == 4){
+        outBitmapMat = brightImg.clone();
+    } else if(optType == 5) {
+        outBitmapMat = gray.clone();
+    }
+    mat_to_bitmap(env, outBitmapMat, outBitmap);
+    //    if((srcBitmapMat.data != outBitmapMat.data)){
+//        __android_log_print(ANDROID_LOG_ERROR, "JNI", "====>%i ===> %i",outBitmapMat.cols,outBitmapMat.rows);
+//    }
+}
+
+static void native_enhance(JNIEnv *env, jclass type, jobject srcBitmap, jobject outBitmap){
+//    Mat srcBitmapMat,outBitmapMat;
+//    bitmap_to_mat(env, srcBitmap, srcBitmapMat);
+//    cv::cvtColor(srcBitmapMat,srcBitmapMat,COLOR_BGRA2BGR);
+//    outBitmapMat = Mat::zeros(srcBitmapMat.rows,srcBitmapMat.cols, srcBitmapMat.type());
+//    Filter().colorEnhance(srcBitmapMat,outBitmapMat);
+//    mat_to_bitmap(env, outBitmapMat, outBitmap);
+    native_commonProcess(env, srcBitmap, outBitmap, 3);
+}
+
+static void native_blackWhite(JNIEnv *env, jclass type, jobject srcBitmap, jobject outBitmap){
+//    Mat srcBitmapMat,outBitmapMat;
+//    bitmap_to_mat(env, srcBitmap, srcBitmapMat);
+//    int height = srcBitmapMat.rows;
+//    int width = srcBitmapMat.cols;
+//    float fScale = Filter().getScale(height, width, 2000);  //1024值可以设定，表示长边尺寸不得超过1024，按照长边归一化
+//    int window_size = (int)(width*fScale * 20 / 256);
+//    window_size = window_size % 2 ? window_size : window_size + 1;
+//    if((srcBitmapMat.data != outBitmapMat.data)){
+//        __android_log_print(ANDROID_LOG_ERROR, "JNI", "阿达收到====>%i  ====>%f",window_size,fScale);
+//    }
+//    cv::cvtColor(srcBitmapMat, srcBitmapMat, cv::COLOR_BGR2GRAY);
+//    outBitmapMat = Mat::zeros(srcBitmapMat.rows,srcBitmapMat.cols, srcBitmapMat.type());
+//    Filter().sauvolaWithSigmoid(srcBitmapMat,outBitmapMat,window_size , 0.1);
+//    mat_to_bitmap(env, outBitmapMat, outBitmap);
+    native_commonProcess(env, srcBitmap, outBitmap, 1);
+}
+
+static void native_brighten(JNIEnv *env, jclass type, jobject srcBitmap, jobject outBitmap){
+    native_commonProcess(env, srcBitmap, outBitmap, 4);
+}
+
+static void native_grey(JNIEnv *env, jclass type, jobject srcBitmap, jobject outBitmap){
+    native_commonProcess(env, srcBitmap, outBitmap, 5);
+}
+
+
 static JNINativeMethod gMethods[] = {
 
         {
@@ -108,6 +210,30 @@ static JNINativeMethod gMethods[] = {
                 "nativeCrop",
                 "(Landroid/graphics/Bitmap;[Landroid/graphics/Point;Landroid/graphics/Bitmap;)V",
                 (void*)native_crop
+        },
+
+        {
+                "enhance",
+                "(Landroid/graphics/Bitmap;Landroid/graphics/Bitmap;)V",
+                (void*)native_enhance
+        },
+
+        {
+                "blackWhite",
+                "(Landroid/graphics/Bitmap;Landroid/graphics/Bitmap;)V",
+                (void*)native_blackWhite
+        },
+
+        {
+            "brighten",
+            "(Landroid/graphics/Bitmap;Landroid/graphics/Bitmap;)V",
+            (void*)native_brighten
+        },
+
+        {
+            "grey",
+            "(Landroid/graphics/Bitmap;Landroid/graphics/Bitmap;)V",
+            (void*)native_grey
         }
 
 };
@@ -126,3 +252,4 @@ JNI_OnLoad(JavaVM* vm, void* reserved) {
     initClassInfo(env);
     return JNI_VERSION_1_4;
 }
+

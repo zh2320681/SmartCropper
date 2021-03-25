@@ -3,13 +3,16 @@ package me.pqpo.smartcropper;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
 import java.io.File;
+
+import me.pqpo.smartcropperlib.FilterType;
+import me.pqpo.smartcropperlib.SmartCropper;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -52,7 +55,13 @@ public class MainActivity extends AppCompatActivity {
         }
         if (requestCode == 100 && photoFile.exists()) {
             Bitmap bitmap = BitmapFactory.decodeFile(photoFile.getPath());
-            ivShow.setImageBitmap(bitmap);
+            Bitmap outBitmap = null;
+
+//            SmartCropper.enhance(bitmap,cropBitmap);
+//            SmartCropper.brighten(bitmap,cropBitmap);
+
+            ivShow.setImageBitmap(SmartCropper.filteImage(bitmap, FilterType.enhance) );
+
         }
     }
 }

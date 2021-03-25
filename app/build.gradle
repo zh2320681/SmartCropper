@@ -8,9 +8,9 @@ android {
         targetSdkVersion 28
         versionCode 2
         versionName "1.1"
-        ndk {
-            abiFilters 'armeabi-v7a', "arm64-v8a", 'x86', 'x86_64'
-        }
+//        ndk {
+//            abiFilters 'armeabi-v7a', "arm64-v8a", 'x86', 'x86_64'
+//        }
     }
     buildTypes {
         release {
@@ -29,6 +29,7 @@ android {
 
 dependencies {
     implementation project(':smartcropperlib')
+//    implementation 'com.github.zh2320681:SmartCropper:v2.1.10'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support:support-v4:28.0.0'
