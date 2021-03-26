@@ -10,7 +10,6 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
-import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
@@ -205,7 +204,7 @@ public class CropImageView extends ImageView {
      */
     public void setImageToCrop(Bitmap bmp) {
         setImageBitmap(bmp);
-        setCropPoints(mAutoScanEnable ? SmartCropper.scan(bmp) : null);
+        setCropPoints(mAutoScanEnable ? SmartCropper.scan(bmp,getContext()) : null);
     }
 
     /**

@@ -19,6 +19,7 @@ import java.nio.channels.FileChannel;
 public class ImageDetector {
 
     private static final String MODEL_FILE = "models/hed_lite_model_quantize.tflite";
+//    private static final String MODEL_FILE = "model.mp3";
 
     private int desiredSize = 256;
 
@@ -35,14 +36,16 @@ public class ImageDetector {
     }
 
     public ImageDetector(Context context, String modelFile) throws IOException {
-        if (TextUtils.isEmpty(modelFile)) {
+        if (modelFile == null && TextUtils.isEmpty(modelFile)) {
             modelFile = MODEL_FILE;
         }
-        MappedByteBuffer tfliteModel = loadTempFlie(context);
-        if(tfliteModel == null){
-            tfliteModel = loadModelFile(context, modelFile);
-        }
-//        MappedByteBuffer tfliteModel = loadModelFile(context, modelFile);
+//        MappedByteBuffer tfliteModel = loadTempFlie(context);
+//        if(tfliteModel == null){
+//            Log.e("TAG","------------>" + modelFile);
+//            tfliteModel = loadModelFile(context, modelFile);
+//        }
+
+        MappedByteBuffer tfliteModel = loadModelFile(context, modelFile);
         Interpreter.Options tfliteOptions = new Interpreter.Options();
         tflite = new Interpreter(tfliteModel, tfliteOptions);
         imgData = ByteBuffer.allocateDirect(desiredSize * desiredSize * 3 * Float.SIZE / Byte.SIZE);
@@ -50,6 +53,8 @@ public class ImageDetector {
 
         outImgData = ByteBuffer.allocateDirect(desiredSize * desiredSize * Float.SIZE / Byte.SIZE);
         outImgData.order(ByteOrder.nativeOrder());
+
+        Log.e("TAG","ImageDetector（。。。。）------------>" + outImgData);
     }
 
     public synchronized Bitmap detectImage(Bitmap bitmap) {
@@ -112,7 +117,6 @@ public class ImageDetector {
                 fileChannel = inputStream.getChannel();
 //                long startOffset = fileDescriptor.getStartOffset();
 //                long declaredLength = fileDescriptor.getDeclaredLength();
-                Log.e("tfliteFile","tfliteFile--------------->加载成功!");
                 return fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, tfliteFile.length());
             } catch ( Exception e){
 
@@ -134,6 +138,7 @@ public class ImageDetector {
     }
 
     private MappedByteBuffer loadModelFile(Context activity, String modelFile) throws IOException {
+        Log.e("tag","----------->" + activity + "   ---------->" + modelFile);
         AssetFileDescriptor fileDescriptor = activity.getAssets().openFd(modelFile);
         FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
         FileChannel fileChannel = inputStream.getChannel();

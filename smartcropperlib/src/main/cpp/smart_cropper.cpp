@@ -197,6 +197,10 @@ static void native_grey(JNIEnv *env, jclass type, jobject srcBitmap, jobject out
     native_commonProcess(env, srcBitmap, outBitmap, 5);
 }
 
+static void native_solfColor(JNIEnv *env, jclass type, jobject srcBitmap, jobject outBitmap){
+    native_commonProcess(env, srcBitmap, outBitmap, 2);
+}
+
 
 static JNINativeMethod gMethods[] = {
 
@@ -234,6 +238,12 @@ static JNINativeMethod gMethods[] = {
             "grey",
             "(Landroid/graphics/Bitmap;Landroid/graphics/Bitmap;)V",
             (void*)native_grey
+        },
+
+        {
+            "solfColor",
+            "(Landroid/graphics/Bitmap;Landroid/graphics/Bitmap;)V",
+            (void*)native_solfColor
         }
 
 };

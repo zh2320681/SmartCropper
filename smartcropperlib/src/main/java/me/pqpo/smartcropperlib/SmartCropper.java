@@ -33,9 +33,16 @@ public class SmartCropper {
      * @param srcBmp 扫描图片
      * @return 返回顶点数组，以 左上，右上，右下，左下排序
      */
-    public static Point[] scan(Bitmap srcBmp) {
+    public static Point[] scan(Bitmap srcBmp, Context context) {
         if (srcBmp == null) {
             throw new IllegalArgumentException("srcBmp cannot be null");
+        }
+        if (sImageDetector == null) {
+            try {
+                sImageDetector = new ImageDetector(context);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         if (sImageDetector != null) {
             Bitmap bitmap = sImageDetector.detectImage(srcBmp);
@@ -89,6 +96,8 @@ public class SmartCropper {
             brighten(srcBitmap,cropBitmap);
         } else if(type == FilterType.grey) {
             grey(srcBitmap,cropBitmap);
+        } else if(type == FilterType.soft) {
+            solfColor(srcBitmap,cropBitmap);
         }
         return cropBitmap;
     }
@@ -100,6 +109,9 @@ public class SmartCropper {
 
     //增强
     private static native void enhance(Bitmap srcBitmap,Bitmap outBitmap);
+
+    //柔和
+    private static native void solfColor(Bitmap srcBitmap,Bitmap outBitmap);
 
     //黑白
     private static native void blackWhite(Bitmap srcBitmap,Bitmap outBitmap);
