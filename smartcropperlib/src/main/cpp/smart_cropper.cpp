@@ -114,7 +114,7 @@ static void native_commonProcess(JNIEnv *env, jobject srcBitmap, jobject outBitm
     Filter filter = Filter();
     int height = img.rows;
     int width = img.cols;
-    float fScale = filter.getScale(height, width, 2000);  //1024值可以设定，表示长边尺寸不得超过1024，按照长边归一化
+    float fScale = filter.getScale(height, width, 1024);  //1024值可以设定，表示长边尺寸不得超过1024，按照长边归一化
 
     int window_size = (int)(width*fScale * 20 / 256);
     window_size = window_size % 2 ? window_size : window_size + 1;
@@ -122,28 +122,44 @@ static void native_commonProcess(JNIEnv *env, jobject srcBitmap, jobject outBitm
     cv::Mat gray, blackWhite,colorImg, enhanceImg, brightImg;
     if (fScale == 1.0) {
         cv::cvtColor(img, gray, cv::COLOR_BGR2GRAY);
-        filter.sauvolaWithSigmoid(gray, blackWhite, window_size, 0.1); //黑白功能
-        filter.coloring(img, blackWhite, colorImg);//上色功能
-        filter.colorEnhance(colorImg, enhanceImg);//上色锐化功能
-        filter.brighten(colorImg,brightImg);
+        if(optType != 5){
+            filter.sauvolaWithSigmoid(gray, blackWhite, window_size, 0.1); //黑白功能
+            if(optType != 1 ){
+                filter.coloring(img, blackWhite, colorImg);//上色功能
+                if(optType == 3){
+                    filter.colorEnhance(colorImg, enhanceImg);//上色锐化功能
+                }
+                if(optType == 4){
+                    filter.brighten(colorImg,brightImg);
+                }
+            }
+        }
     } else {
         //将图像缩小
         cv::Mat imgReisize, blackWhiteResize, colorImgResize, enhanceImgResize, brightImgResize;
         cv::resize(img, imgReisize, cv::Size(), fScale, fScale, cv::INTER_CUBIC);
         //对缩小后的图像进行处理
-        cv::cvtColor(imgReisize, gray, cv::COLOR_BGR2GRAY);
-        filter.sauvolaWithSigmoid(gray, blackWhiteResize, window_size, 0.1);  //黑白功能
-        filter.coloring(imgReisize, blackWhiteResize, colorImgResize); //上色功能
-        filter.colorEnhance(colorImgResize, enhanceImgResize); //上色锐化功能
-        filter.brighten(imgReisize, brightImgResize); //增亮功能
-
+        if (fScale == 1.0) {
+            cv::cvtColor(imgReisize, gray, cv::COLOR_BGR2GRAY);
+            if(optType != 5){
+                filter.sauvolaWithSigmoid(gray, blackWhiteResize, window_size, 0.1);  //黑白功能
+                cv::resize(blackWhiteResize, blackWhite, cv::Size(width, height), cv::INTER_CUBIC);
+                if(optType != 1 ){
+                    filter.coloring(imgReisize, blackWhiteResize, colorImgResize); //上色功能
+                    cv::resize(colorImgResize, colorImg, cv::Size(width, height), cv::INTER_CUBIC);
+                    if(optType == 3){
+                        filter.colorEnhance(colorImgResize, enhanceImgResize); //上色锐化功能
+                        cv::resize(enhanceImgResize, enhanceImg, cv::Size(width, height), cv::INTER_CUBIC);
+                    }
+                    if(optType == 4){
+                        filter.brighten(imgReisize, brightImgResize); //增亮功能
+                        cv::resize(brightImgResize, brightImg, cv::Size(width, height), cv::INTER_CUBIC);
+                    }
+                }
+            }
+        }
         //对处理后的图片放大到原有尺寸
-        cv::resize(blackWhiteResize, blackWhite, cv::Size(width, height), cv::INTER_CUBIC);
-        cv::resize(colorImgResize, colorImg, cv::Size(width, height), cv::INTER_CUBIC);
-        cv::resize(enhanceImgResize, enhanceImg, cv::Size(width, height), cv::INTER_CUBIC);
-        cv::resize(brightImgResize, brightImg, cv::Size(width, height), cv::INTER_CUBIC);
     }
-
     if(optType == 1) {
         outBitmapMat = blackWhite.clone();
     } else if (optType == 2){

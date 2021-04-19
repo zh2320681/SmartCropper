@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
 //            SmartCropper.enhance(bitmap,cropBitmap);
 //            SmartCropper.brighten(bitmap,cropBitmap);
 
-            ivShow.setImageBitmap(SmartCropper.filteImage(bitmap, FilterType.enhance) );
+            ivShow.setImageBitmap(SmartCropper.filteImage(bitmap, FilterType.soft) );
 
         }
     }
