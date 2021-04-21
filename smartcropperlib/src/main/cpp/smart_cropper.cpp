@@ -110,7 +110,6 @@ static void native_commonProcess(JNIEnv *env, jobject srcBitmap, jobject outBitm
     } else {
         srcBitmapMat.copyTo(img);
     }
-
     Filter filter = Filter();
     int height = img.rows;
     int width = img.cols;
@@ -139,22 +138,20 @@ static void native_commonProcess(JNIEnv *env, jobject srcBitmap, jobject outBitm
         cv::Mat imgReisize, blackWhiteResize, colorImgResize, enhanceImgResize, brightImgResize;
         cv::resize(img, imgReisize, cv::Size(), fScale, fScale, cv::INTER_CUBIC);
         //对缩小后的图像进行处理
-        if (fScale == 1.0) {
-            cv::cvtColor(imgReisize, gray, cv::COLOR_BGR2GRAY);
-            if(optType != 5){
-                filter.sauvolaWithSigmoid(gray, blackWhiteResize, window_size, 0.1);  //黑白功能
-                cv::resize(blackWhiteResize, blackWhite, cv::Size(width, height), cv::INTER_CUBIC);
-                if(optType != 1 ){
-                    filter.coloring(imgReisize, blackWhiteResize, colorImgResize); //上色功能
-                    cv::resize(colorImgResize, colorImg, cv::Size(width, height), cv::INTER_CUBIC);
-                    if(optType == 3){
-                        filter.colorEnhance(colorImgResize, enhanceImgResize); //上色锐化功能
-                        cv::resize(enhanceImgResize, enhanceImg, cv::Size(width, height), cv::INTER_CUBIC);
-                    }
-                    if(optType == 4){
-                        filter.brighten(imgReisize, brightImgResize); //增亮功能
-                        cv::resize(brightImgResize, brightImg, cv::Size(width, height), cv::INTER_CUBIC);
-                    }
+        cv::cvtColor(imgReisize, gray, cv::COLOR_BGR2GRAY);
+        if(optType != 5){
+            filter.sauvolaWithSigmoid(gray, blackWhiteResize, window_size, 0.1);  //黑白功能
+            cv::resize(blackWhiteResize, blackWhite, cv::Size(width, height), cv::INTER_CUBIC);
+            if(optType != 1 ){
+                filter.coloring(imgReisize, blackWhiteResize, colorImgResize); //上色功能
+                cv::resize(colorImgResize, colorImg, cv::Size(width, height), cv::INTER_CUBIC);
+                if(optType == 3){
+                    filter.colorEnhance(colorImgResize, enhanceImgResize); //上色锐化功能
+                    cv::resize(enhanceImgResize, enhanceImg, cv::Size(width, height), cv::INTER_CUBIC);
+                }
+                if(optType == 4){
+                    filter.brighten(imgReisize, brightImgResize); //增亮功能
+                    cv::resize(brightImgResize, brightImg, cv::Size(width, height), cv::INTER_CUBIC);
                 }
             }
         }

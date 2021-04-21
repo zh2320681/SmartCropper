@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -59,7 +60,8 @@ public class MainActivity extends AppCompatActivity {
 
 //            SmartCropper.enhance(bitmap,cropBitmap);
 //            SmartCropper.brighten(bitmap,cropBitmap);
-
+//            ivShow.setImageBitmap(bitmap);
+            Log.e("TAG","----->" + bitmap.getWidth() + "-------->" + bitmap.getHeight());
             ivShow.setImageBitmap(SmartCropper.filteImage(bitmap, FilterType.soft) );
 
         }

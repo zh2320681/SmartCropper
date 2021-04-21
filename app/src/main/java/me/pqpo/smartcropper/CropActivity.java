@@ -224,8 +224,8 @@ public class CropActivity extends AppCompatActivity implements EasyPermissions.P
         int outHeight = options.outHeight;
         int outWidth = options.outWidth;
         int sampleSize = 1;
-        int destHeight = 1000;
-        int destWidth = 1000;
+        int destHeight = 2000;
+        int destWidth = 2000;
         if (outHeight > destHeight || outWidth > destHeight) {
             if (outHeight > outWidth) {
                 sampleSize = outHeight / destHeight;
