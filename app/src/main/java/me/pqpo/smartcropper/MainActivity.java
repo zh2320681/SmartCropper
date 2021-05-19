@@ -61,8 +61,7 @@ public class MainActivity extends AppCompatActivity {
 //            SmartCropper.enhance(bitmap,cropBitmap);
 //            SmartCropper.brighten(bitmap,cropBitmap);
 //            ivShow.setImageBitmap(bitmap);
-            Log.e("TAG","----->" + bitmap.getWidth() + "-------->" + bitmap.getHeight());
-            ivShow.setImageBitmap(SmartCropper.filteImage(bitmap, FilterType.soft) );
+            ivShow.setImageBitmap(SmartCropper.filteImage(bitmap, FilterType.grey) );
 
         }
     }

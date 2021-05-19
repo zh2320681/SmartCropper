@@ -121,7 +121,7 @@ static void native_commonProcess(JNIEnv *env, jobject srcBitmap, jobject outBitm
     cv::Mat gray, blackWhite,colorImg, enhanceImg, brightImg;
     if (fScale == 1.0) {
         cv::cvtColor(img, gray, cv::COLOR_BGR2GRAY);
-        if(optType != 5){
+        if(optType != 15){
             filter.sauvolaWithSigmoid(gray, blackWhite, window_size, 0.1); //黑白功能
             if(optType != 1 ){
                 filter.coloring(img, blackWhite, colorImg);//上色功能
@@ -135,12 +135,13 @@ static void native_commonProcess(JNIEnv *env, jobject srcBitmap, jobject outBitm
         }
     } else {
         //将图像缩小
-        cv::Mat imgReisize, blackWhiteResize, colorImgResize, enhanceImgResize, brightImgResize;
+        cv::Mat grayReisize,imgReisize, blackWhiteResize, colorImgResize, enhanceImgResize, brightImgResize;
         cv::resize(img, imgReisize, cv::Size(), fScale, fScale, cv::INTER_CUBIC);
         //对缩小后的图像进行处理
-        cv::cvtColor(imgReisize, gray, cv::COLOR_BGR2GRAY);
-        if(optType != 5){
-            filter.sauvolaWithSigmoid(gray, blackWhiteResize, window_size, 0.1);  //黑白功能
+        cv::cvtColor(imgReisize, grayReisize, cv::COLOR_BGR2GRAY);
+        cv::resize(grayReisize, gray, cv::Size(width, height), cv::INTER_CUBIC);
+        if(optType != 15){
+            filter.sauvolaWithSigmoid(grayReisize, blackWhiteResize, window_size, 0.1);  //黑白功能
             cv::resize(blackWhiteResize, blackWhite, cv::Size(width, height), cv::INTER_CUBIC);
             if(optType != 1 ){
                 filter.coloring(imgReisize, blackWhiteResize, colorImgResize); //上色功能
